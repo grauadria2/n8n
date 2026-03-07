@@ -6,55 +6,66 @@
 <title>Finance Tracker</title>
 
 <style>
+
 body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
+font-family: Arial, sans-serif;
+background:#f4f6f8;
+padding:20px;
 }
 
 .container{
-  max-width:400px;
-  margin:auto;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+max-width:420px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 h2{
-  text-align:center;
-  margin-bottom:20px;
+text-align:center;
+margin-bottom:20px;
 }
 
 label{
-  font-weight:bold;
-  margin-top:10px;
-  display:block;
+font-weight:bold;
+margin-top:12px;
+display:block;
 }
 
 select,input{
-  width:100%;
-  padding:10px;
-  margin-top:5px;
-  margin-bottom:15px;
-  border-radius:6px;
-  border:1px solid #ccc;
+width:100%;
+padding:10px;
+margin-top:6px;
+margin-bottom:14px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:15px;
 }
 
 button{
-  width:100%;
-  padding:12px;
-  background:#4CAF50;
-  color:white;
-  border:none;
-  border-radius:6px;
-  font-size:16px;
-  cursor:pointer;
+width:100%;
+padding:12px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:6px;
+font-size:16px;
+cursor:pointer;
 }
 
 button:hover{
-  background:#43a047;
+background:#43a047;
 }
+
+.success{
+text-align:center;
+color:green;
+font-weight:bold;
+margin-top:10px;
+display:none;
+}
+
 </style>
 
 </head>
@@ -65,10 +76,10 @@ button:hover{
 
 <h2>New Transaction</h2>
 
-<form method="POST" action="TU_WEBHOOK_N8N">
+<form id="financeForm">
 
 <label>Date</label>
-<input type="date" name="date_time" required>
+<input type="date" name="date_time" id="date" required>
 
 <label>Type</label>
 <select name="type">
@@ -101,12 +112,16 @@ button:hover{
 <select id="subcategory" name="sub_category" required></select>
 
 <label>Description</label>
-<input type="text" name="description">
+<input type="text" name="description" placeholder="Starbucks, Mercadona, Uber...">
 
 <label>Amount</label>
 <input type="number" step="0.01" name="amount" required>
 
 <button type="submit">Save Transaction</button>
+
+<div class="success" id="successMessage">
+Transaction saved ✔
+</div>
 
 </form>
 
@@ -114,78 +129,34 @@ button:hover{
 
 <script>
 
+const webhookURL = "https://n8n-adriagrau.onrender.com/webhook/55f74fdf-05e0-4e15-95bb-8f5d0baa72b2";
+
 const subcategories = {
 
-Income: [
-"salary",
-"bonus",
-"refund",
-"other_income"
-],
+Income:["salary","bonus","refund","other_income"],
 
-Housing: [
-"rent",
-"electricity",
-"water",
-"internet",
-"home_supplies"
-],
+Housing:["rent","electricity","water","internet","home_supplies"],
 
-Food: [
-"groceries",
-"restaurant",
-"coffee",
-"delivery"
-],
+Food:["groceries","restaurant","coffee","delivery"],
 
-Transport: [
-"metro",
-"train",
-"fuel",
-"taxi",
-"parking"
-],
+Transport:["metro","train","fuel","taxi","parking"],
 
-Lifestyle: [
-"gym",
-"clothing",
-"entertainment",
-"hobbies"
-],
+Lifestyle:["gym","clothing","entertainment","hobbies"],
 
-Travel: [
-"flight",
-"accommodation",
-"activities",
-"transport"
-],
+Travel:["flight","accommodation","activities","transport"],
 
-Health: [
-"pharmacy",
-"doctor",
-"insurance"
-],
+Health:["pharmacy","doctor","insurance"],
 
-Subscriptions: [
-"streaming",
-"music",
-"software",
-"cloud"
-],
+Subscriptions:["streaming","music","software","cloud"],
 
-Shopping: [
-"electronics",
-"home_items",
-"gifts",
-"other_shopping"
-]
+Shopping:["electronics","home_items","gifts","other_shopping"]
 
 };
 
 function updateSubcategory(){
 
-const category = document.getElementById("category").value;
-const subSelect = document.getElementById("subcategory");
+const category=document.getElementById("category").value;
+const subSelect=document.getElementById("subcategory");
 
 subSelect.innerHTML="";
 
@@ -202,6 +173,36 @@ subSelect.appendChild(option);
 });
 
 }
+
+document.getElementById("financeForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const formData=new FormData(this);
+const data=Object.fromEntries(formData.entries());
+
+await fetch(webhookURL,{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify(data)
+});
+
+document.getElementById("successMessage").style.display="block";
+
+this.reset();
+
+setTodayDate();
+
+});
+
+function setTodayDate(){
+
+const today=new Date().toISOString().split("T")[0];
+document.getElementById("date").value=today;
+
+}
+
+setTodayDate();
 
 </script>
 
